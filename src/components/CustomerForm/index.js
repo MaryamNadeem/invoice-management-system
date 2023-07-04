@@ -25,10 +25,9 @@ export default function CustomerForm() {
     fax: "",
     salesTaxNumber: "",
     ntn: "",
-    openingBalanceAmount: "",
-    openingBalanceDate: "",
-    currentBalance: "",
-    date: format(new Date(), "dd-MMM-yyyy kk:mm:ss"),
+    openingBalanceAmount: 0,
+    openingBalanceDate: format(new Date(), "yyyy-MM-dd"),
+    createdAt: new Date(),
   });
   const [isSaved, setIsSaved] = useState();
   const [result, setResult] = useState();
@@ -41,28 +40,36 @@ export default function CustomerForm() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const res = await axios.post(saveCustomerApi, {
-      customer: inputs,
-    });
-    setResult(res.data.result);
-    if (res.data.success === true) {
-      setIsSaved(true);
-      setInputs({
-        name: "",
-        address: "",
-        contactPerson: "",
-        phoneNumber: "",
-        mobileNumber: "",
-        email: "",
-        fax: "",
-        salesTaxNumber: "",
-        ntn: "",
-        openingBalanceAmount: "",
-        openingBalanceDate: "",
-        currentBalance: "",
+    const form = event.currentTarget;
+    if (form.checkValidity() === true) {
+      const res = await axios.post(saveCustomerApi, {
+        customer: {
+          ...inputs,
+          openingBalanceAmount: inputs.openingBalanceAmount || 0,
+          currentBalance: inputs.openingBalanceAmount || 0,
+        },
       });
-    } else {
-      setIsSaved(false);
+      setResult(res.data.result);
+      if (res.data.success === true) {
+        setIsSaved(true);
+        setInputs({
+          ...inputs,
+          name: "",
+          address: "",
+          contactPerson: "",
+          phoneNumber: "",
+          mobileNumber: "",
+          email: "",
+          fax: "",
+          salesTaxNumber: "",
+          ntn: "",
+          openingBalanceAmount: "",
+          openingBalanceDate: format(new Date(), "yyyy-MM-dd"),
+          createdAt: new Date(),
+        });
+      } else {
+        setIsSaved(false);
+      }
     }
   };
 
@@ -78,6 +85,7 @@ export default function CustomerForm() {
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                   <Form.Label>Customer Name</Form.Label>
                   <Form.Control
+                    required
                     type="text"
                     placeholder="Enter Customer Name"
                     name="name"
@@ -120,7 +128,7 @@ export default function CustomerForm() {
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                   <Form.Label>Phone Number</Form.Label>
                   <Form.Control
-                    type="text"
+                    type="tel"
                     placeholder="Enter Phone Number"
                     name="phoneNumber"
                     onChange={handleChange}
@@ -132,7 +140,7 @@ export default function CustomerForm() {
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                   <Form.Label>Mobile Number</Form.Label>
                   <Form.Control
-                    type="text"
+                    type="tel"
                     placeholder="Enter Mobile Number"
                     name="mobileNumber"
                     onChange={handleChange}
@@ -146,7 +154,7 @@ export default function CustomerForm() {
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                   <Form.Label>Email</Form.Label>
                   <Form.Control
-                    type="text"
+                    type="email"
                     placeholder="Enter Email"
                     name="email"
                     onChange={handleChange}
@@ -158,7 +166,7 @@ export default function CustomerForm() {
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                   <Form.Label>Fax</Form.Label>
                   <Form.Control
-                    type="text"
+                    type="tel"
                     placeholder="Enter Fax"
                     name="fax"
                     onChange={handleChange}
@@ -198,7 +206,7 @@ export default function CustomerForm() {
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                   <Form.Label>Opening Balance Amount</Form.Label>
                   <Form.Control
-                    type="text"
+                    type="number"
                     placeholder="Enter Opening Balance Amount"
                     name="openingBalanceAmount"
                     onChange={handleChange}
@@ -210,7 +218,7 @@ export default function CustomerForm() {
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                   <Form.Label>Opening Balance Date</Form.Label>
                   <Form.Control
-                    type="text"
+                    type="date"
                     placeholder="Enter Opening Balance Date"
                     name="openingBalanceDate"
                     onChange={handleChange}
@@ -218,27 +226,15 @@ export default function CustomerForm() {
                   />
                 </Form.Group>
               </Col>
-              <Col>
-                <Form.Group className="mb-3" controlId="formBasicEmail">
-                  <Form.Label>Current Balance</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter Current Balance"
-                    name="currentBalance"
-                    onChange={handleChange}
-                    value={inputs.currentBalance}
-                  />
-                </Form.Group>
-              </Col>
+            </Row>
+            <Row>
+              <Button variant="dark" type="submit">
+                <i className="fa fa-save"></i> Save
+              </Button>
             </Row>
           </Container>
         </Form>
         <Container>
-          <Row>
-            <Button variant="dark" type="submit" onClick={handleSubmit}>
-              <i className="fa fa-save"></i> Save
-            </Button>
-          </Row>
           <Row>
             <div className={styles.alertWrapper}>
               {isSaved === true && <Alert variant="success">{result}</Alert>}

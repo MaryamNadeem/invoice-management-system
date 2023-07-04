@@ -1,3 +1,8 @@
+import { useEffect, useState } from "react";
+// @import depedecies
+import axios from "axios";
+// @import api
+import { getCustomerApi } from "../../api";
 // @import bootstrap components
 import Table from "react-bootstrap/Table";
 import Dropdown from "react-bootstrap/Dropdown";
@@ -5,16 +10,54 @@ import Pagination from "react-bootstrap/Pagination";
 // @import styles
 import styles from "./index.module.scss";
 
+const orderByValues = [
+  { field: "name", desc: true },
+  { field: "createdAt", desc: true },
+  { field: "currentBalance", desc: true },
+  { field: "name", desc: false },
+  { field: "createdAt", desc: false },
+  { field: "currentBalance", desc: false },
+];
+
 export default function CustomerListing() {
-  let active = 2;
-  let items = [];
-  for (let number = 1; number <= 5; number++) {
-    items.push(
-      <Pagination.Item key={number} active={number === active}>
+  const [customerListing, setCustomerListing] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [orderBy, setOrderBy] = useState({ field: "createdAt", desc: true });
+
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(1);
+  const [totalPageCount, setTotalPageCount] = useState(0);
+
+  let pageButtons = [];
+  for (let number = 1; number <= totalPageCount; number++) {
+    pageButtons.push(
+      <Pagination.Item key={number} active={number === pageNumber}>
         {number}
       </Pagination.Item>
     );
   }
+
+  const getCustomerListing = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `${getCustomerApi}?orderBy=${orderBy.field}&orderDesc=${orderBy.desc}&pageNumber=${pageNumber}&pageSize=${pageSize}`
+      );
+      if (res.data) {
+        setCustomerListing(res.data.customers);
+        setTotalPageCount(res.data.pagination.totalPages);
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getCustomerListing();
+  }, [orderBy]);
+
   return (
     <>
       <style type="text/css">
@@ -38,90 +81,72 @@ export default function CustomerListing() {
           </Dropdown.Toggle>
 
           <Dropdown.Menu>
-            <Dropdown.Item href="#/action-1">Date</Dropdown.Item>
-            <Dropdown.Item href="#/action-2">Customer Name</Dropdown.Item>
-            <Dropdown.Item href="#/action-3">Total</Dropdown.Item>
+            {orderByValues.map((item) => (
+              <Dropdown.Item
+                style={{ textTransform: "capitalize" }}
+                className={`${
+                  item.desc === orderBy.desc && item.field === orderBy.field
+                    ? "bg-secondary text-light"
+                    : ""
+                }`}
+                onClick={() => setOrderBy(item)}
+                key={`${item.field}-${item.desc}`}
+              >
+                {item.field} {item.desc ? "(DESC)" : "(ASC)"}
+              </Dropdown.Item>
+            ))}
           </Dropdown.Menu>
         </Dropdown>
       </div>
       <div className={styles.tableContainer}>
-        <Table striped bordered hover>
+        <Table
+          striped
+          bordered
+          hover
+          responsive
+          className="table-responsive text-nowrap"
+        >
           <thead>
             <tr>
-              <th>SR.</th>
-              <th>Quantity</th>
-              <th>Description</th>
-              <th>Price</th>
-              <th>Total</th>
-              <th>Sales Tax</th>
-              <th>Value with Tax</th>
+              <th>sr#</th>
+              <th>Name</th>
+              <th>Address</th>
+              <th>Contact Person</th>
+              <th>Phone Number</th>
+              <th>Mobile Number</th>
+              <th>Email</th>
+              <th>Fax</th>
+              <th>Sales Tax Number</th>
+              <th>NTN</th>
+              <th>Opening Balance Amount</th>
+              <th>Opening Balance Date</th>
+              <th>Current Balance</th>
+              <th>Created At</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>1</td>
-              <td>Mark</td>
-              <td>Otto</td>
-              <td>@mdo</td>
-              <td>@mdo</td>
-              <td>@mdo</td>
-              <td>@mdo</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>Jacob</td>
-              <td>Thornton</td>
-              <td>@fat</td>
-              <td>@fat</td>
-              <td>@fat</td>
-              <td>@fat</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td colSpan={2}>Larry the Bird</td>
-              <td>@twitter</td>
-              <td>@twitter</td>
-              <td>@twitter</td>
-              <td>@twitter</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td colSpan={2}>Larry the Bird</td>
-              <td>@twitter</td>
-              <td>@twitter</td>
-              <td>@twitter</td>
-              <td>@twitter</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td colSpan={2}>Larry the Bird</td>
-              <td>@twitter</td>
-              <td>@twitter</td>
-              <td>@twitter</td>
-              <td>@twitter</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td colSpan={2}>Larry the Bird</td>
-              <td>@twitter</td>
-              <td>@twitter</td>
-              <td>@twitter</td>
-              <td>@twitter</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td colSpan={2}>Larry the Bird</td>
-              <td>@twitter</td>
-              <td>@twitter</td>
-              <td>@twitter</td>
-              <td>@twitter</td>
-            </tr>
+            {customerListing.map((item, i) => (
+              <tr>
+                <td>{i + 1}</td>
+                <td>{item.name}</td>
+                <td>{item.address}</td>
+                <td>{item.contactPerson}</td>
+                <td>{item.phoneNumber}</td>
+                <td>{item.mobileNumber}</td>
+                <td>{item.email}</td>
+                <td>{item.fax}</td>
+                <td>{item.salesTaxNumber}</td>
+                <td>{item.ntn}</td>
+                <td>{item.openingBalanceAmount}</td>
+                <td>{item.openingBalanceDate}</td>
+                <td>{item.currentBalance}</td>
+                <td>{item.createdAt}</td>
+              </tr>
+            ))}
           </tbody>
         </Table>
         <div className={styles.paginationWrapper}>
-          <Pagination itemClass="page-item" linkClass="page-link">
-            {items}
-          </Pagination>
+          <Pagination linkClass="page-link">{pageButtons}</Pagination>
         </div>
       </div>
     </>
