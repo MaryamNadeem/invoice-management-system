@@ -71,14 +71,9 @@ exports.getCustomers = onRequest(async (req, res) => {
       ? customerCollection.orderBy(orderByField, "desc")
       : customerCollection.orderBy(orderByField);
 
-    const list = await (
-      await query
-        // .startAfter((pageNumber - 1) * pageSize)
-        .limit(50)
-        .get()
-    ).docs;
+    let list = await getPaginatedList(pageNumber, pageSize, query);
 
-    const count = await query.count().get().data().count;
+    const count = (await query.count().get()).data().count;
 
     const customers = list.map((item) => {
       return {
@@ -111,4 +106,19 @@ const getPageDetails = (pageNumber, pageSize, count) => {
     totalCount: count,
     totalPages: totalPages,
   };
+};
+
+const getPaginatedList = async (pageNumber, pageSize, query) => {
+  let list = [];
+  if (pageNumber === 1) {
+    list = await (await query.limit(pageSize).get()).docs;
+  } else {
+    const first = query.limit((pageNumber - 1) * pageSize);
+    const snapshot = await first.get();
+    // Get the last document
+    const last = snapshot.docs[snapshot.docs.length - 1];
+    list = await (await query.startAfter(last).limit(pageSize).get()).docs;
+  }
+
+  return list;
 };

@@ -25,13 +25,17 @@ export default function CustomerListing() {
   const [orderBy, setOrderBy] = useState({ field: "createdAt", desc: true });
 
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
   const [totalPageCount, setTotalPageCount] = useState(0);
 
   let pageButtons = [];
   for (let number = 1; number <= totalPageCount; number++) {
     pageButtons.push(
-      <Pagination.Item key={number} active={number === pageNumber}>
+      <Pagination.Item
+        key={number}
+        onClick={() => setPageNumber(number)}
+        active={number === pageNumber}
+      >
         {number}
       </Pagination.Item>
     );
@@ -56,7 +60,7 @@ export default function CustomerListing() {
 
   useEffect(() => {
     getCustomerListing();
-  }, [orderBy]);
+  }, [orderBy, pageNumber]);
 
   return (
     <>
@@ -74,7 +78,7 @@ export default function CustomerListing() {
     `}
       </style>
       <h1 className={styles.heading}>Customer Listing</h1>
-      <div class={styles.dropdownWrapper}>
+      <div className={styles.dropdownWrapper}>
         <Dropdown>
           <Dropdown.Toggle variant="secondary" id="dropdown-basic">
             Order By
