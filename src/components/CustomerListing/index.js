@@ -1,31 +1,31 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 // @import depedecies
-import axios from "axios";
+import axios from 'axios';
 // @import api
-import { getCustomerApi } from "../../api";
+import { getCustomerApi } from '../../api';
 // @import bootstrap components
-import Table from "react-bootstrap/Table";
-import Dropdown from "react-bootstrap/Dropdown";
-import Pagination from "react-bootstrap/Pagination";
+import Table from 'react-bootstrap/Table';
+import Dropdown from 'react-bootstrap/Dropdown';
+import Pagination from 'react-bootstrap/Pagination';
 // @import styles
-import styles from "./index.module.scss";
+import styles from './index.module.scss';
 
 const orderByValues = [
-  { field: "name", desc: true },
-  { field: "createdAt", desc: true },
-  { field: "currentBalance", desc: true },
-  { field: "name", desc: false },
-  { field: "createdAt", desc: false },
-  { field: "currentBalance", desc: false },
+  { field: 'name', desc: true },
+  { field: 'createdAt', desc: true },
+  { field: 'currentBalance', desc: true },
+  { field: 'name', desc: false },
+  { field: 'createdAt', desc: false },
+  { field: 'currentBalance', desc: false },
 ];
 
 export default function CustomerListing() {
   const [customerListing, setCustomerListing] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [orderBy, setOrderBy] = useState({ field: "createdAt", desc: true });
+  const [orderBy, setOrderBy] = useState({ field: 'createdAt', desc: true });
 
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(2);
   const [totalPageCount, setTotalPageCount] = useState(0);
 
   let pageButtons = [];
@@ -34,8 +34,7 @@ export default function CustomerListing() {
       <Pagination.Item
         key={number}
         onClick={() => setPageNumber(number)}
-        active={number === pageNumber}
-      >
+        active={number === pageNumber}>
         {number}
       </Pagination.Item>
     );
@@ -87,16 +86,15 @@ export default function CustomerListing() {
           <Dropdown.Menu>
             {orderByValues.map((item) => (
               <Dropdown.Item
-                style={{ textTransform: "capitalize" }}
+                style={{ textTransform: 'capitalize' }}
                 className={`${
                   item.desc === orderBy.desc && item.field === orderBy.field
-                    ? "bg-secondary text-light"
-                    : ""
+                    ? 'bg-secondary text-light'
+                    : ''
                 }`}
                 onClick={() => setOrderBy(item)}
-                key={`${item.field}-${item.desc}`}
-              >
-                {item.field} {item.desc ? "(DESC)" : "(ASC)"}
+                key={`${item.field}-${item.desc}`}>
+                {item.field} {item.desc ? '(DESC)' : '(ASC)'}
               </Dropdown.Item>
             ))}
           </Dropdown.Menu>
@@ -108,8 +106,7 @@ export default function CustomerListing() {
           bordered
           hover
           responsive
-          className="table-responsive text-nowrap"
-        >
+          className="table-responsive text-nowrap">
           <thead>
             <tr>
               <th>sr#</th>
