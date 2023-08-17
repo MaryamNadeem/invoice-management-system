@@ -19,13 +19,15 @@ const orderByValues = [
   { field: "currentBalance", desc: false },
 ];
 
+const pageSizeValues = [5, 10, 50, 100];
+
 export default function CustomerListing() {
   const [customerListing, setCustomerListing] = useState([]);
   const [loading, setLoading] = useState(false);
   const [orderBy, setOrderBy] = useState({ field: "createdAt", desc: true });
 
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
   const [totalPageCount, setTotalPageCount] = useState(0);
 
   let pageButtons = [];
@@ -60,7 +62,7 @@ export default function CustomerListing() {
 
   useEffect(() => {
     getCustomerListing();
-  }, [orderBy, pageNumber]);
+  }, [orderBy, pageNumber, pageSize]);
 
   return (
     <>
@@ -101,6 +103,26 @@ export default function CustomerListing() {
             ))}
           </Dropdown.Menu>
         </Dropdown>
+        <Dropdown className={styles.pageSizeDropDown}>
+          <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+            Page Size
+          </Dropdown.Toggle>
+
+          <Dropdown.Menu>
+            {pageSizeValues.map((item) => (
+              <Dropdown.Item
+                style={{ textTransform: "capitalize" }}
+                className={`${
+                  item === pageSize ? "bg-secondary text-light" : ""
+                }`}
+                onClick={() => setPageSize(item)}
+                key={`pagesize-${item}`}
+              >
+                {item}
+              </Dropdown.Item>
+            ))}
+          </Dropdown.Menu>
+        </Dropdown>
       </div>
       <div className={styles.tableContainer}>
         <Table
@@ -130,7 +152,7 @@ export default function CustomerListing() {
           </thead>
           <tbody>
             {customerListing.map((item, i) => (
-              <tr>
+              <tr key={i}>
                 <td>{i + 1}</td>
                 <td>{item.name}</td>
                 <td>{item.address}</td>
