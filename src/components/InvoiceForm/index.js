@@ -1,3 +1,8 @@
+import { useEffect, useState } from "react";
+// @import depedecies
+import axios from "axios";
+// @import api
+import { getCustomerApi } from "../../api";
 // @import bootstrap components
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
@@ -9,6 +14,29 @@ import Table from "react-bootstrap/Table";
 import styles from "./index.module.scss";
 
 function InvoiceForm() {
+  const [loading, setLoading] = useState(false);
+  const [customerListing, setCustomerListing] = useState([]);
+
+  const getCustomerListing = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `${getCustomerApi}?orderBy=name&orderDesc=false`
+      );
+      if (res.data) {
+        setCustomerListing(res.data.customers);
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getCustomerListing();
+  }, []);
+
   return (
     <>
       <h1 className={styles.heading}>Sales Invoice</h1>
@@ -18,14 +46,11 @@ function InvoiceForm() {
           <Form.Group className="mb-3">
             <Form.Label>Select Customer</Form.Label>
             <Form.Select>
-              <option>Customer</option>
-              <option>Customer</option>
-              <option>Customer</option>
-              <option>Customer</option>
-              <option>Customer</option>
-              <option>Customer</option>
-              <option>Customer</option>
-              <option>Customer</option>
+              {customerListing.map((item, i) => (
+                <option>
+                  {item.name} - {item.id}
+                </option>
+              ))}
             </Form.Select>
           </Form.Group>
           <Form.Group className="mb-3" controlId="formBasicEmail">
