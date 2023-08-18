@@ -16,6 +16,20 @@ import styles from "./index.module.scss";
 function InvoiceForm() {
   const [loading, setLoading] = useState(false);
   const [customerListing, setCustomerListing] = useState([]);
+  const [itemListing, setItemListing] = useState([]);
+  const [item, setItem] = useState({
+    name: "",
+    quantity: 0,
+    rate: 0,
+    taxPercentage: 0,
+    taxAmount: 0,
+    totalWithTax: 0,
+    totalWithoutTax: 0,
+  });
+  const [totalWithoutTax, setTotalWithoutTax] = useState(0);
+  const [taxAmount, setTaxAmount] = useState(0);
+  const [totalWithTax, setTotalWithTax] = useState(0);
+  const [creditTerms, setCreditTerms] = useState("");
 
   const getCustomerListing = async () => {
     try {
@@ -37,6 +51,56 @@ function InvoiceForm() {
     getCustomerListing();
   }, []);
 
+  const handleChange = (event) => {
+    const name = event.target.name;
+    const value = event.target.value;
+    let quantity, rate, taxPercentage;
+    name === "quantity" && value
+      ? (quantity = parseInt(value))
+      : (quantity = item.quantity);
+    name === "rate" && value ? (rate = parseInt(value)) : (rate = item.rate);
+    name === "taxPercentage" && value
+      ? (taxPercentage = parseInt(value))
+      : (taxPercentage = item.taxPercentage);
+    let taxAmount = quantity * rate * (taxPercentage / 100);
+
+    setItem((item) => ({
+      ...item,
+      [name]: value,
+      taxAmount: taxAmount,
+      totalWithTax: quantity * rate + taxAmount,
+      totalWithoutTax: quantity * rate,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setItem({
+      name: "",
+      quantity: 0,
+      rate: 0,
+      taxPercentage: 0,
+      taxAmount: 0,
+      totalWithTax: 0,
+      totalWithoutTax: 0,
+    });
+    setItemListing((itemListing) => [...itemListing, item]);
+  };
+
+  useEffect(() => {
+    let preTax = 0,
+      tax = 0,
+      postTax = 0;
+    for (let i = 0; i < itemListing.length; i++) {
+      preTax += itemListing[i].totalWithoutTax;
+      tax += itemListing[i].taxAmount;
+      postTax += itemListing[i].totalWithTax;
+    }
+    setTotalWithoutTax(preTax);
+    setTaxAmount(tax);
+    setTotalWithTax(postTax);
+  }, [itemListing]);
+
   return (
     <>
       <h1 className={styles.heading}>Sales Invoice</h1>
@@ -46,6 +110,9 @@ function InvoiceForm() {
           <Form.Group className="mb-3">
             <Form.Label>Select Customer</Form.Label>
             <Form.Select>
+              <option selected disabled>
+                Select Customer
+              </option>
               {customerListing.map((item, i) => (
                 <option>
                   {item.name} - {item.id}
@@ -55,19 +122,34 @@ function InvoiceForm() {
           </Form.Group>
           <Form.Group className="mb-3" controlId="formBasicEmail">
             <Form.Label>Credit Terms</Form.Label>
-            <Form.Control type="text" placeholder="Enter Credit Terms" />
+            <Form.Control
+              type="text"
+              placeholder="Enter Credit Terms"
+              name="creditTerms"
+              value={creditTerms}
+              onChange={(e) => {
+                setCreditTerms(e.target.value);
+              }}
+            />
           </Form.Group>
         </Form>
       </div>
       <div className={styles.formContainer}>
         <h3 className={styles.innerHeading}>Add Items</h3>
-        <Form>
+        <Form onSubmit={handleSubmit}>
           <Container>
             <Row>
               <Col>
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                   <Form.Label>Item</Form.Label>
-                  <Form.Control type="text" placeholder="Enter Item Name" />
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter Item Name"
+                    name="name"
+                    onChange={handleChange}
+                    value={item.name}
+                    required
+                  />
                 </Form.Group>
               </Col>
             </Row>
@@ -75,19 +157,37 @@ function InvoiceForm() {
               <Col>
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                   <Form.Label>Quantity</Form.Label>
-                  <Form.Control type="text" placeholder="Enter Item Name" />
+                  <Form.Control
+                    type="number"
+                    placeholder="Enter Item Quantity"
+                    name="quantity"
+                    onChange={handleChange}
+                    value={item.quantity}
+                  />
                 </Form.Group>
               </Col>
               <Col>
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                   <Form.Label>Rate</Form.Label>
-                  <Form.Control type="text" placeholder="Enter Item Name" />
+                  <Form.Control
+                    type="numer"
+                    placeholder="Enter Item Rate"
+                    name="rate"
+                    onChange={handleChange}
+                    value={item.rate}
+                  />
                 </Form.Group>
               </Col>
               <Col>
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                   <Form.Label>Total without Sales Tax</Form.Label>
-                  <Form.Control type="text" placeholder="Enter Item Name" />
+                  <Form.Control
+                    type="number"
+                    placeholder="Total without Sales Tax"
+                    name="totalWithoutTax"
+                    value={item.totalWithoutTax}
+                    disabled
+                  />
                 </Form.Group>
               </Col>
             </Row>
@@ -95,19 +195,35 @@ function InvoiceForm() {
               <Col>
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                   <Form.Label>Sales Tax Percenatage</Form.Label>
-                  <Form.Control type="text" placeholder="Enter Item Name" />
+                  <Form.Control
+                    type="number"
+                    placeholder="Enter Sales Tax Percentage"
+                    name="taxPercentage"
+                    value={item.taxPercentage}
+                    onChange={handleChange}
+                  />
                 </Form.Group>
               </Col>
               <Col>
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                   <Form.Label>Tax Amount</Form.Label>
-                  <Form.Control type="text" placeholder="Enter Item Name" />
+                  <Form.Control
+                    type="number"
+                    placeholder="Tax Amount"
+                    value={item.taxAmount}
+                    disabled
+                  />
                 </Form.Group>
               </Col>
               <Col>
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                   <Form.Label>Total with Sales Tax</Form.Label>
-                  <Form.Control type="text" placeholder="Enter Item Name" />
+                  <Form.Control
+                    type="number"
+                    placeholder="Total With Sales Tax"
+                    value={item.totalWithTax}
+                    disabled
+                  />
                 </Form.Group>
               </Col>
             </Row>
@@ -125,48 +241,35 @@ function InvoiceForm() {
             <thead>
               <tr>
                 <th>SR.</th>
+                <th>Name</th>
                 <th>Quantity</th>
-                <th>Description</th>
-                <th>Price</th>
-                <th>Total</th>
-                <th>Sales Tax</th>
-                <th>Value with Tax</th>
+                <th>Rate</th>
+                <th>Sales Tax Percentage</th>
+                <th>Total Without Tax</th>
+                <th>Tax Amount</th>
+                <th>Total With Tax</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>1</td>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
-                <td>@mdo</td>
-                <td>@mdo</td>
-                <td>@mdo</td>
-              </tr>
-              <tr>
-                <td>2</td>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-                <td>@fat</td>
-                <td>@fat</td>
-                <td>@fat</td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td colSpan={2}>Larry the Bird</td>
-                <td>@twitter</td>
-                <td>@twitter</td>
-                <td>@twitter</td>
-                <td>@twitter</td>
-              </tr>
+              {itemListing.map((listItem, index) => (
+                <tr>
+                  <td>{index + 1}</td>
+                  <td>{listItem.name}</td>
+                  <td>{listItem.quantity}</td>
+                  <td>{listItem.rate}</td>
+                  <td>{listItem.taxPercentage}%</td>
+                  <td>{listItem.totalWithoutTax}</td>
+                  <td>{listItem.taxAmount}</td>
+                  <td>{listItem.totalWithTax}</td>
+                </tr>
+              ))}
             </tbody>
           </Table>
         </div>
         <div>
-          <h6>Total without Sales Tax</h6>
-          <h6>Tax Amount</h6>
-          <h6>Total with Sales Tax</h6>
+          <h6>Total without Sales Tax: {totalWithoutTax}</h6>
+          <h6>Tax Amount: {taxAmount}</h6>
+          <h6>Total with Sales Tax: {totalWithTax}</h6>
           <Button variant="dark">
             <i className="fa fa-save"></i> Save
           </Button>
