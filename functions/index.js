@@ -29,6 +29,17 @@ exports.saveCustomer = onRequest(async (req, res) => {
         success: true,
         result: `Customer saved successfully with id ${writeResult.id}`,
       });
+      const customerRef = admin
+        .firestore()
+        .collection("Customer")
+        .doc(writeResult.id);
+
+      await customerRef.set(
+        {
+          id: writeResult.id,
+        },
+        { merge: true }
+      );
     } else {
       res.json({
         success: false,
@@ -90,6 +101,7 @@ exports.getCustomers = onRequest(async (req, res) => {
         openingBalanceDate: item.get("openingBalanceDate"),
         currentBalance: item.get("currentBalance"),
         createdAt: item.get("createdAt"),
+        id: item.get("id"),
       };
     });
 

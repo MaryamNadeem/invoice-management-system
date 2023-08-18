@@ -135,6 +135,7 @@ export default function CustomerListing() {
           <thead>
             <tr>
               <th>sr#</th>
+              <th>ID</th>
               <th>Name</th>
               <th>Address</th>
               <th>Contact Person</th>
@@ -154,6 +155,7 @@ export default function CustomerListing() {
             {customerListing.map((item, i) => (
               <tr key={i}>
                 <td>{i + 1}</td>
+                <td>{item.id}</td>
                 <td>{item.name}</td>
                 <td>{item.address}</td>
                 <td>{item.contactPerson}</td>
