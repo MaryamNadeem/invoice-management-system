@@ -60,9 +60,12 @@ export default function CustomerListing() {
     }
   };
 
+  /* eslint-disable */
+
   useEffect(() => {
     getCustomerListing();
-  }, [orderBy, pageNumber, pageSize, getCustomerListing]);
+  }, [orderBy, pageNumber, pageSize]);
+  /* eslint-enable */
 
   return (
     <>
