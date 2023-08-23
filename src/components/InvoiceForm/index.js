@@ -30,6 +30,7 @@ function InvoiceForm() {
   const [taxAmount, setTaxAmount] = useState(0);
   const [totalWithTax, setTotalWithTax] = useState(0);
   const [creditTerms, setCreditTerms] = useState("");
+  const [customer, setCustomer] = useState(null);
 
   const getCustomerListing = async () => {
     try {
@@ -109,12 +110,16 @@ function InvoiceForm() {
         <Form>
           <Form.Group className="mb-3">
             <Form.Label>Select Customer</Form.Label>
-            <Form.Select>
+            <Form.Select
+              onChange={(e) => {
+                setCustomer(e.target.value);
+              }}
+            >
               <option selected disabled>
                 Select Customer
               </option>
               {customerListing.map((item, i) => (
-                <option>
+                <option value={item.id} key={i}>
                   {item.name} - {item.id}
                 </option>
               ))}
@@ -252,7 +257,7 @@ function InvoiceForm() {
             </thead>
             <tbody>
               {itemListing.map((listItem, index) => (
-                <tr>
+                <tr key={index}>
                   <td>{index + 1}</td>
                   <td>{listItem.name}</td>
                   <td>{listItem.quantity}</td>
