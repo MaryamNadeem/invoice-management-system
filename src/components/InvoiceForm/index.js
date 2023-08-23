@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 // @import depedecies
 import axios from "axios";
 // @import api
-import { getCustomerApi } from "../../api";
+import { saveInvoiceApi, getCustomerApi } from "../../api";
 // @import bootstrap components
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
-import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Alert from "react-bootstrap/Alert";
 import Table from "react-bootstrap/Table";
+import Button from "react-bootstrap/Button";
+import Container from "react-bootstrap/Container";
 // @import styles
 import styles from "./index.module.scss";
 
@@ -30,7 +31,8 @@ function InvoiceForm() {
   const [taxAmount, setTaxAmount] = useState(0);
   const [totalWithTax, setTotalWithTax] = useState(0);
   const [creditTerms, setCreditTerms] = useState("");
-  const [customer, setCustomer] = useState(null);
+  const [customer, setCustomer] = useState("-1");
+  const [isSaved, setIsSaved] = useState();
 
   const getCustomerListing = async () => {
     try {
@@ -74,7 +76,7 @@ function InvoiceForm() {
     }));
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
     setItem({
       name: "",
@@ -88,6 +90,32 @@ function InvoiceForm() {
     setItemListing((itemListing) => [...itemListing, item]);
   };
 
+  const saveInvoice = async () => {
+    if (!customer) {
+      alert("Please select Customer");
+      return;
+    }
+    let invoice = {
+      customer: customer,
+      creditTerms: creditTerms,
+      itemListing: itemListing,
+      totalWithoutTax: totalWithoutTax,
+      taxAmount: taxAmount,
+      totalWithTax: totalWithTax,
+    };
+    const res = await axios.post(saveInvoiceApi, { invoice: invoice });
+    if (res.data.success === true) {
+      setIsSaved(true);
+      setCustomer("-1");
+      setCreditTerms("");
+      setItemListing([]);
+      setTotalWithTax(0);
+      setTotalWithoutTax(0);
+      setTaxAmount(0);
+    } else {
+      setIsSaved(false);
+    }
+  };
   useEffect(() => {
     let preTax = 0,
       tax = 0,
@@ -114,8 +142,9 @@ function InvoiceForm() {
               onChange={(e) => {
                 setCustomer(e.target.value);
               }}
+              value={customer}
             >
-              <option selected disabled>
+              <option value={-1} disabled>
                 Select Customer
               </option>
               {customerListing.map((item, i) => (
@@ -275,7 +304,7 @@ function InvoiceForm() {
           <h6>Total without Sales Tax: {totalWithoutTax}</h6>
           <h6>Tax Amount: {taxAmount}</h6>
           <h6>Total with Sales Tax: {totalWithTax}</h6>
-          <Button variant="dark">
+          <Button variant="dark" onClick={saveInvoice}>
             <i className="fa fa-save"></i> Save
           </Button>
           &nbsp;
@@ -283,6 +312,20 @@ function InvoiceForm() {
             <i className="fa fa-print"></i> Print
           </Button>
         </div>
+        <Container>
+          <Row>
+            <div className={styles.alertWrapper}>
+              {isSaved === true && (
+                <Alert variant="success">Invoice saved Successfully</Alert>
+              )}
+              {isSaved === false && (
+                <Alert variant="danger">
+                  There was an error in saving the Invoice, please try again
+                </Alert>
+              )}
+            </div>
+          </Row>
+        </Container>
       </div>
     </>
   );

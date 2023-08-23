@@ -134,3 +134,24 @@ const getPaginatedList = async (pageNumber, pageSize, query) => {
 
   return list;
 };
+
+exports.saveInvoice = onRequest(async (req, res) => {
+  cors(req, res, async () => {
+    const invoice = req.body.invoice;
+    if (invoice.customer) {
+      const writeResult = await admin
+        .firestore()
+        .collection("Invoice")
+        .add(invoice);
+      res.json({
+        success: true,
+        result: `Invoice saved successfully`,
+      });
+    } else {
+      res.json({
+        success: false,
+        result: "Please provide a customer for invoice",
+      });
+    }
+  });
+});
