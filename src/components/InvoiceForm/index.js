@@ -15,7 +15,7 @@ import Container from "react-bootstrap/Container";
 import styles from "./index.module.scss";
 
 function InvoiceForm() {
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [customerListing, setCustomerListing] = useState([]);
   const [itemListing, setItemListing] = useState([]);
   const [item, setItem] = useState({
@@ -36,7 +36,7 @@ function InvoiceForm() {
 
   const getCustomerListing = async () => {
     try {
-      setLoading(true);
+      // setLoading(true);
       const res = await axios.get(
         `${getCustomerApi}?orderBy=name&orderDesc=false`
       );
@@ -46,7 +46,7 @@ function InvoiceForm() {
     } catch (e) {
       console.log(e);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 

@@ -23,7 +23,7 @@ const pageSizeValues = [5, 10, 50, 100];
 
 export default function CustomerListing() {
   const [customerListing, setCustomerListing] = useState([]);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);s
   const [orderBy, setOrderBy] = useState({ field: "createdAt", desc: true });
 
   const [pageNumber, setPageNumber] = useState(1);
@@ -45,7 +45,7 @@ export default function CustomerListing() {
 
   const getCustomerListing = async () => {
     try {
-      setLoading(true);
+      // setLoading(true);
       const res = await axios.get(
         `${getCustomerApi}?orderBy=${orderBy.field}&orderDesc=${orderBy.desc}&pageNumber=${pageNumber}&pageSize=${pageSize}`
       );
@@ -56,13 +56,13 @@ export default function CustomerListing() {
     } catch (e) {
       console.log(e);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
   useEffect(() => {
     getCustomerListing();
-  }, [orderBy, pageNumber, pageSize]);
+  }, [orderBy, pageNumber, pageSize, getCustomerListing]);
 
   return (
     <>
