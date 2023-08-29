@@ -25,9 +25,7 @@ const AppContextProvider = ({ children }) => {
   const getCustomerListing = async () => {
     try {
       // setLoading(true);
-      const res = await axios.get(
-        `${getCustomerApi}?orderBy=name&orderDesc=false`
-      );
+      const res = await axios.get(`${getCustomerApi}`);
       if (res.data) {
         setCustomerList(res.data.customers);
       }
