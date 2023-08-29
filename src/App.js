@@ -7,6 +7,7 @@ import InvoiceListing from "./components/InvoiceListing";
 import CustomerListing from "./components/CustomerListing";
 // @import modules
 import Navbar from "./modules/Navbar";
+import { AppContextProvider } from "./context";
 
 const routes = [
   {
@@ -34,10 +35,12 @@ function App() {
 
   return (
     <div>
-      <Navbar />
-      <BrowserRouter>
-        <Routes>{routeComponents}</Routes>
-      </BrowserRouter>
+      <AppContextProvider>
+        <BrowserRouter>
+          <Navbar />
+          <Routes>{routeComponents}</Routes>
+        </BrowserRouter>
+      </AppContextProvider>
     </div>
   );
 }

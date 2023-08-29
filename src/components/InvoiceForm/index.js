@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 // @import depedecies
 import axios from "axios";
 // @import api
@@ -13,10 +13,10 @@ import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 // @import styles
 import styles from "./index.module.scss";
+import { AppContext } from "../../context";
 
 function InvoiceForm() {
-  // const [loading, setLoading] = useState(false);
-  const [customerListing, setCustomerListing] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [itemListing, setItemListing] = useState([]);
   const [item, setItem] = useState({
     name: "",
@@ -31,28 +31,10 @@ function InvoiceForm() {
   const [taxAmount, setTaxAmount] = useState(0);
   const [totalWithTax, setTotalWithTax] = useState(0);
   const [creditTerms, setCreditTerms] = useState("");
-  const [customer, setCustomer] = useState("-1");
+  const [customer, setCustomer] = useState({ id: "" });
   const [isSaved, setIsSaved] = useState();
 
-  const getCustomerListing = async () => {
-    try {
-      // setLoading(true);
-      const res = await axios.get(
-        `${getCustomerApi}?orderBy=name&orderDesc=false`
-      );
-      if (res.data) {
-        setCustomerListing(res.data.customers);
-      }
-    } catch (e) {
-      console.log(e);
-    } finally {
-      // setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getCustomerListing();
-  }, []);
+  const { customerList, customerListObject } = useContext(AppContext);
 
   const handleChange = (event) => {
     const name = event.target.name;
@@ -96,7 +78,11 @@ function InvoiceForm() {
       return;
     }
     let invoice = {
-      customer: customer,
+      customer: {
+        id: customer.id,
+        name: customer.name,
+        serial: customer.serial,
+      },
       creditTerms: creditTerms,
       itemListing: itemListing,
       totalWithoutTax: totalWithoutTax,
@@ -104,10 +90,11 @@ function InvoiceForm() {
       totalWithTax: totalWithTax,
       createdAt: new Date(),
     };
+    setLoading(true);
     const res = await axios.post(saveInvoiceApi, { invoice: invoice });
     if (res.data.success === true) {
       setIsSaved(true);
-      setCustomer("-1");
+      setCustomer({ id: "" });
       setCreditTerms("");
       setItemListing([]);
       setTotalWithTax(0);
@@ -116,7 +103,9 @@ function InvoiceForm() {
     } else {
       setIsSaved(false);
     }
+    setLoading(false);
   };
+
   useEffect(() => {
     let preTax = 0,
       tax = 0,
@@ -141,14 +130,15 @@ function InvoiceForm() {
             <Form.Label>Select Customer</Form.Label>
             <Form.Select
               onChange={(e) => {
-                setCustomer(e.target.value);
+                const customer = customerListObject[e.target.value];
+                setCustomer({ ...customer });
               }}
-              value={customer}
+              value={customer.id}
             >
-              <option value={-1} disabled>
+              <option value={""} disabled>
                 Select Customer
               </option>
-              {customerListing.map((item, i) => (
+              {customerList.map((item, i) => (
                 <option value={item.id} key={i}>
                   {item.name} - {item.id}
                 </option>
@@ -305,8 +295,8 @@ function InvoiceForm() {
           <h6>Total without Sales Tax: {totalWithoutTax}</h6>
           <h6>Tax Amount: {taxAmount}</h6>
           <h6>Total with Sales Tax: {totalWithTax}</h6>
-          <Button variant="dark" onClick={saveInvoice}>
-            <i className="fa fa-save"></i> Save
+          <Button disabled={loading} variant="dark" onClick={saveInvoice}>
+            <i className="fa fa-save"></i> {loading ? "Saving" : "Save"}
           </Button>
           &nbsp;
           <Button variant="dark">

@@ -1,8 +1,6 @@
-import { useEffect, useState } from "react";
-// @import depedecies
-import axios from "axios";
-// @import api
-import { getCustomerApi } from "../../api";
+import { useState, useContext } from "react";
+// @import context
+import { AppContext } from "../../context";
 // @import bootstrap components
 import Table from "react-bootstrap/Table";
 import Dropdown from "react-bootstrap/Dropdown";
@@ -11,24 +9,73 @@ import Pagination from "react-bootstrap/Pagination";
 import styles from "./index.module.scss";
 
 const orderByValues = [
+  { field: "serial", desc: true },
   { field: "name", desc: true },
   { field: "createdAt", desc: true },
-  { field: "currentBalance", desc: true },
   { field: "name", desc: false },
   { field: "createdAt", desc: false },
-  { field: "currentBalance", desc: false },
+  { field: "serial", desc: false },
 ];
 
 const pageSizeValues = [5, 10, 50, 100];
 
 export default function CustomerListing() {
-  const [customerListing, setCustomerListing] = useState([]);
+  const { customerList } = useContext(AppContext);
   // const [loading, setLoading] = useState(false);s
-  const [orderBy, setOrderBy] = useState({ field: "createdAt", desc: true });
+  const [orderBy, setOrderBy] = useState({ field: "serial", desc: true });
 
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalPageCount, setTotalPageCount] = useState(0);
+  const [pageSize, setPageSize] = useState(50);
+
+  const totalPageCount = Math.ceil(customerList?.length / pageSize) || 0;
+
+  const paginateData = () => {
+    let list = customerList || [];
+
+    if (orderBy?.field) {
+      if (orderBy.desc) {
+        list = list.sort((a, b) => {
+          let valueA;
+          let valueB;
+          try {
+            valueA = a[orderBy.field]?.toLowerCase() || "";
+            valueB = b[orderBy.field]?.toLowerCase() || "";
+          } catch (e) {
+            valueA = a[orderBy.field];
+            valueB = b[orderBy.field];
+          }
+          if (valueA > valueB) {
+            return -1;
+          }
+          return 1;
+        });
+      } else {
+        list = list.sort((a, b) => {
+          let valueA;
+          let valueB;
+          try {
+            valueA = a[orderBy.field]?.toLowerCase() || "";
+            valueB = b[orderBy.field]?.toLowerCase() || "";
+          } catch (e) {
+            valueA = a[orderBy.field];
+            valueB = b[orderBy.field];
+          }
+          if (valueB > valueA) {
+            return -1;
+          }
+          return 1;
+        });
+      }
+    }
+
+    if (pageSize && pageNumber) {
+      list = list.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
+    }
+
+    return list;
+  };
+
+  const customerListing = paginateData();
 
   let pageButtons = [];
   for (let number = 1; number <= totalPageCount; number++) {
@@ -42,30 +89,6 @@ export default function CustomerListing() {
       </Pagination.Item>
     );
   }
-
-  const getCustomerListing = async () => {
-    try {
-      // setLoading(true);
-      const res = await axios.get(
-        `${getCustomerApi}?orderBy=${orderBy.field}&orderDesc=${orderBy.desc}&pageNumber=${pageNumber}&pageSize=${pageSize}`
-      );
-      if (res.data) {
-        setCustomerListing(res.data.customers);
-        setTotalPageCount(res.data.pagination.totalPages);
-      }
-    } catch (e) {
-      console.log(e);
-    } finally {
-      // setLoading(false);
-    }
-  };
-
-  /* eslint-disable */
-
-  useEffect(() => {
-    getCustomerListing();
-  }, [orderBy, pageNumber, pageSize]);
-  /* eslint-enable */
 
   return (
     <>
@@ -157,7 +180,7 @@ export default function CustomerListing() {
           <tbody>
             {customerListing.map((item, i) => (
               <tr key={i}>
-                <td>{i + 1}</td>
+                <td>{item.serial}</td>
                 <td>{item.id}</td>
                 <td>{item.name}</td>
                 <td>{item.address}</td>
@@ -177,7 +200,7 @@ export default function CustomerListing() {
           </tbody>
         </Table>
         <div className={styles.paginationWrapper}>
-          <Pagination linkClass="page-link">{pageButtons}</Pagination>
+          <Pagination linkclass="page-link">{pageButtons}</Pagination>
         </div>
       </div>
     </>

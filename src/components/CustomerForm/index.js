@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 // @import depedecies
 import axios from "axios";
 import { format } from "date-fns";
 // @import api
 import { saveCustomerApi } from "../../api";
+// @import context
+import { AppContext } from "../../context";
 // @import bootstrap components
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -29,8 +31,10 @@ export default function CustomerForm() {
     openingBalanceDate: format(new Date(), "yyyy-MM-dd"),
     createdAt: new Date(),
   });
+  const [loading, setLoading] = useState();
   const [isSaved, setIsSaved] = useState();
   const [result, setResult] = useState();
+  const { customerList, setCustomerList } = useContext(AppContext);
 
   const handleChange = (event) => {
     const name = event.target.name;
@@ -42,6 +46,7 @@ export default function CustomerForm() {
     event.preventDefault();
     const form = event.currentTarget;
     if (form.checkValidity() === true) {
+      setLoading(true);
       const res = await axios.post(saveCustomerApi, {
         customer: {
           ...inputs,
@@ -67,9 +72,11 @@ export default function CustomerForm() {
           openingBalanceDate: format(new Date(), "yyyy-MM-dd"),
           createdAt: new Date(),
         });
+        setCustomerList([...customerList, res.data.data]);
       } else {
         setIsSaved(false);
       }
+      setLoading(false);
     }
   };
 
@@ -228,8 +235,8 @@ export default function CustomerForm() {
               </Col>
             </Row>
             <Row>
-              <Button variant="dark" type="submit">
-                <i className="fa fa-save"></i> Save
+              <Button disabled={loading} variant="dark" type="submit">
+                <i className="fa fa-save"></i> {loading ? "Saving" : "Save"}
               </Button>
             </Row>
           </Container>

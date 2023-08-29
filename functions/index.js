@@ -31,6 +31,11 @@ exports.saveCustomer = onRequest(async (req, res) => {
       res.json({
         success: true,
         result: `Customer saved successfully with id ${writeResult.id}`,
+        data: {
+          ...customer,
+          serial: serialNumber,
+          id: writeResult.id,
+        },
       });
 
       const customerRef = admin
@@ -55,65 +60,12 @@ exports.saveCustomer = onRequest(async (req, res) => {
 
 exports.getCustomers = onRequest(async (req, res) => {
   cors(req, res, async () => {
-    let orderByField = req.query?.orderBy || "";
-    let orderDesc =
-      req.query?.orderDesc && req.query.orderDesc === "true" ? true : false;
-    let pageNumber = req.query?.pageNumber
-      ? Number.parseInt(req.query.pageNumber)
-      : 1;
-    let pageSize = req.query?.pageSize
-      ? Number.parseInt(req.query.pageSize)
-      : 10;
-
-    if (pageNumber <= 0) pageNumber = 1;
-    if (pageSize <= 0 || pageSize >= 100) pageSize = 10;
-
-    switch (orderByField) {
-      case "createdAt":
-        orderByField = "createdAt";
-        break;
-      case "currentBalance":
-        orderByField = "currentBalance";
-        break;
-      case "name":
-        orderByField = "name";
-        break;
-      default:
-        orderByField = "createdAt";
-        break;
-    }
-
     const customerCollection = admin.firestore().collection("Customer");
 
-    let query = orderDesc
-      ? customerCollection.orderBy(orderByField, "desc")
-      : customerCollection.orderBy(orderByField);
+    const list = await (await customerCollection.get()).docs;
+    const customers = list.map((item) => mapCustomer(item));
 
-    let list = await getPaginatedList(pageNumber, pageSize, query);
-
-    const count = (await query.count().get()).data().count;
-
-    const customers = list.map((item) => {
-      return {
-        name: item.get("name"),
-        address: item.get("address"),
-        contactPerson: item.get("contactPerson"),
-        phoneNumber: item.get("phoneNumber"),
-        mobileNumber: item.get("mobileNumber"),
-        email: item.get("email"),
-        fax: item.get("fax"),
-        salesTaxNumber: item.get("salesTaxNumber"),
-        ntn: item.get("ntn"),
-        openingBalanceAmount: item.get("openingBalanceAmount"),
-        openingBalanceDate: item.get("openingBalanceDate"),
-        currentBalance: item.get("currentBalance"),
-        createdAt: item.get("createdAt"),
-        id: item.get("id"),
-      };
-    });
-
-    const pagination = getPageDetails(pageNumber, pageSize, count);
-    res.json({ customers, pagination });
+    res.json({ customers });
   });
 });
 
@@ -203,17 +155,7 @@ exports.getInvoices = onRequest(async (req, res) => {
 
     const count = (await query.count().get()).data().count;
 
-    const invoices = list.map((item) => {
-      return {
-        customer: item.get("customer"),
-        creditTerms: item.get("creditTerms"),
-        itemListing: item.get("itemListing"),
-        totalWithoutTax: item.get("totalWithoutTax"),
-        taxAmount: item.get("taxAmount"),
-        totalWithTax: item.get("totalWithTax"),
-        createdAt: item.get("createdAt"),
-      };
-    });
+    const invoices = list.map((item) => mapInvoice(item));
 
     const pagination = getPageDetails(pageNumber, pageSize, count);
     res.json({ invoices, pagination });
@@ -230,4 +172,43 @@ const generateSerial = async (collection) => {
     returnValue = serial + 1;
   }
   return returnValue;
+};
+
+const mapInvoice = (item) => {
+  if (!item) {
+    return null;
+  }
+  return {
+    customer: item.get("customer"),
+    creditTerms: item.get("creditTerms"),
+    itemListing: item.get("itemListing"),
+    totalWithoutTax: item.get("totalWithoutTax"),
+    serial: item.get("serial"),
+    taxAmount: item.get("taxAmount"),
+    totalWithTax: item.get("totalWithTax"),
+    createdAt: item.get("createdAt"),
+  };
+};
+
+const mapCustomer = (item) => {
+  if (!item) {
+    return null;
+  }
+  return {
+    name: item.get("name"),
+    address: item.get("address"),
+    contactPerson: item.get("contactPerson"),
+    phoneNumber: item.get("phoneNumber"),
+    mobileNumber: item.get("mobileNumber"),
+    email: item.get("email"),
+    serial: item.get("serial"),
+    fax: item.get("fax"),
+    salesTaxNumber: item.get("salesTaxNumber"),
+    ntn: item.get("ntn"),
+    openingBalanceAmount: item.get("openingBalanceAmount"),
+    openingBalanceDate: item.get("openingBalanceDate"),
+    currentBalance: item.get("currentBalance"),
+    createdAt: item.get("createdAt"),
+    id: item.get("id"),
+  };
 };

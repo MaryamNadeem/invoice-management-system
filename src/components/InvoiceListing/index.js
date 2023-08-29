@@ -28,7 +28,6 @@ export default function InvoiceListing() {
   const [pageNumber, setPageNumber] = useState(1);
   const [totalPageCount, setTotalPageCount] = useState(0);
   const [invoiceListing, setInvoiceListing] = useState([]);
-  const [customerListing, setCustomerListing] = useState([]);
   const [orderBy, setOrderBy] = useState({ field: "totalWithTax", desc: true });
   const [invoiceDetails, setInvoiceDetails] = useState({});
   const [show, setShow] = useState(false);
@@ -43,25 +42,8 @@ export default function InvoiceListing() {
         `${getInvoiceApi}?orderBy=${orderBy.field}&orderDesc=${orderBy.desc}&pageNumber=${pageNumber}&pageSize=${pageSize}`
       );
       if (res.data) {
-        console.log("printing response data", res.data);
         setInvoiceListing(res.data.invoices);
         setTotalPageCount(res.data.pagination.totalPages);
-      }
-    } catch (e) {
-      console.log(e);
-    } finally {
-      // setLoading(false);
-    }
-  };
-
-  const getCustomerListing = async () => {
-    try {
-      // setLoading(true);
-      const res = await axios.get(
-        `${getCustomerApi}?orderBy=name&orderDesc=false`
-      );
-      if (res.data) {
-        setCustomerListing(res.data.customers);
       }
     } catch (e) {
       console.log(e);
@@ -76,10 +58,6 @@ export default function InvoiceListing() {
     getInvoiceListing();
   }, [orderBy, pageNumber, pageSize]);
   /* eslint-enable */
-
-  useEffect(() => {
-    getCustomerListing();
-  }, []);
 
   let pageButtons = [];
   for (let number = 1; number <= totalPageCount; number++) {
@@ -109,7 +87,7 @@ export default function InvoiceListing() {
     `}
       </style>
       <h1 className={styles.heading}>Invoice Listing</h1>
-      <div class={styles.dropdownWrapper}>
+      <div className={styles.dropdownWrapper}>
         <Dropdown>
           <Dropdown.Toggle variant="secondary" id="dropdown-basic">
             Order By
@@ -170,14 +148,8 @@ export default function InvoiceListing() {
           <tbody>
             {invoiceListing.map((invoice, i) => (
               <tr key={i}>
-                <td>{i + 1}</td>
-                <td>
-                  {customerListing.length > 0 &&
-                    customerListing.find(
-                      (customer) => customer.id === invoice.customer
-                    ).name}
-                  {invoice.customer.id}
-                </td>
+                <td>{invoice.serial}</td>
+                <td>{invoice.customer.name}</td>
                 <td>{invoice.creditTerms}</td>
                 <td>{invoice.totalWithoutTax}</td>
                 <td>{invoice.taxAmount}</td>
@@ -200,7 +172,7 @@ export default function InvoiceListing() {
           </tbody>
         </Table>
         <div className={styles.paginationWrapper}>
-          <Pagination itemClass="page-item" linkClass="page-link">
+          <Pagination itemclass="page-item" linkClass="page-link">
             {pageButtons}
           </Pagination>
         </div>
