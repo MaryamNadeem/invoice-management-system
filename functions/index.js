@@ -21,14 +21,18 @@ exports.saveCustomer = onRequest(async (req, res) => {
   cors(req, res, async () => {
     const customer = req.body.customer;
     if (customer.name) {
+      const serialNumber = await generateSerial(
+        admin.firestore().collection("Customer")
+      );
       const writeResult = await admin
         .firestore()
         .collection("Customer")
-        .add(customer);
+        .add({ ...customer, serial: serialNumber });
       res.json({
         success: true,
         result: `Customer saved successfully with id ${writeResult.id}`,
       });
+
       const customerRef = admin
         .firestore()
         .collection("Customer")
@@ -66,10 +70,13 @@ exports.getCustomers = onRequest(async (req, res) => {
 
     switch (orderByField) {
       case "createdAt":
+        orderByField = "createdAt";
         break;
       case "currentBalance":
+        orderByField = "currentBalance";
         break;
       case "name":
+        orderByField = "name";
         break;
       default:
         orderByField = "createdAt";
@@ -139,10 +146,13 @@ exports.saveInvoice = onRequest(async (req, res) => {
   cors(req, res, async () => {
     const invoice = req.body.invoice;
     if (invoice.customer) {
-      const writeResult = await admin
+      const serialNumber = await generateSerial(
+        admin.firestore().collection("Invoice")
+      );
+      await admin
         .firestore()
         .collection("Invoice")
-        .add(invoice);
+        .add({ ...invoice, serial: serialNumber });
       res.json({
         success: true,
         result: `Invoice saved successfully`,
@@ -155,3 +165,69 @@ exports.saveInvoice = onRequest(async (req, res) => {
     }
   });
 });
+
+exports.getInvoices = onRequest(async (req, res) => {
+  cors(req, res, async () => {
+    let orderByField = req.query?.orderBy || "";
+    let orderDesc =
+      req.query?.orderDesc && req.query.orderDesc === "true" ? true : false;
+    let pageNumber = req.query?.pageNumber
+      ? Number.parseInt(req.query.pageNumber)
+      : 1;
+    let pageSize = req.query?.pageSize
+      ? Number.parseInt(req.query.pageSize)
+      : 10;
+
+    if (pageNumber <= 0) pageNumber = 1;
+    if (pageSize <= 0 || pageSize >= 100) pageSize = 10;
+
+    switch (orderByField) {
+      case "createdAt":
+        orderByField = "createdAt";
+        break;
+      case "totalWithTax":
+        orderByField = "totalWithTax";
+        break;
+      default:
+        orderByField = "createdAt";
+        break;
+    }
+
+    const invoiceCollection = admin.firestore().collection("Invoice");
+
+    let query = orderDesc
+      ? invoiceCollection.orderBy(orderByField, "desc")
+      : invoiceCollection.orderBy(orderByField);
+
+    let list = await getPaginatedList(pageNumber, pageSize, query);
+
+    const count = (await query.count().get()).data().count;
+
+    const invoices = list.map((item) => {
+      return {
+        customer: item.get("customer"),
+        creditTerms: item.get("creditTerms"),
+        itemListing: item.get("itemListing"),
+        totalWithoutTax: item.get("totalWithoutTax"),
+        taxAmount: item.get("taxAmount"),
+        totalWithTax: item.get("totalWithTax"),
+        createdAt: item.get("createdAt"),
+      };
+    });
+
+    const pagination = getPageDetails(pageNumber, pageSize, count);
+    res.json({ invoices, pagination });
+  });
+});
+
+const generateSerial = async (collection) => {
+  const queryResult = await collection.orderBy("serial", "desc").limit(1).get();
+  const latestResult = await queryResult.docs;
+  const serial = latestResult && latestResult[0]?.get("serial");
+
+  let returnValue = 1;
+  if (serial) {
+    returnValue = serial + 1;
+  }
+  return returnValue;
+};
