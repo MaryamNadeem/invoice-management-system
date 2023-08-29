@@ -102,6 +102,7 @@ function InvoiceForm() {
       totalWithoutTax: totalWithoutTax,
       taxAmount: taxAmount,
       totalWithTax: totalWithTax,
+      createdAt: new Date(),
     };
     const res = await axios.post(saveInvoiceApi, { invoice: invoice });
     if (res.data.success === true) {
