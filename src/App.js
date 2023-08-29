@@ -8,6 +8,9 @@ import CustomerListing from "./components/CustomerListing";
 // @import modules
 import Navbar from "./modules/Navbar";
 import { AppContextProvider } from "./context";
+// @import css
+import "react-select-search/style.css";
+import "./styles/global.scss";
 
 const routes = [
   {

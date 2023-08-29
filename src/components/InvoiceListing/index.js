@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 // @import depedecies
 import axios from "axios";
 // @import api
-import { getInvoiceApi, getCustomerApi } from "../../api";
+import { getInvoiceApi } from "../../api";
 // @import bootstrap components
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";

@@ -1,8 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 // @import depedecies
 import axios from "axios";
+import SelectSearch from "react-select-search";
 // @import api
-import { saveInvoiceApi, getCustomerApi } from "../../api";
+import { saveInvoiceApi } from "../../api";
 // @import bootstrap components
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -73,7 +74,7 @@ function InvoiceForm() {
   };
 
   const saveInvoice = async () => {
-    if (!customer) {
+    if (!customer || !customer.id) {
       alert("Please select Customer");
       return;
     }
@@ -128,22 +129,24 @@ function InvoiceForm() {
         <Form>
           <Form.Group className="mb-3">
             <Form.Label>Select Customer</Form.Label>
-            <Form.Select
-              onChange={(e) => {
-                const customer = customerListObject[e.target.value];
-                setCustomer({ ...customer });
-              }}
+            <SelectSearch
+              className="select-search"
+              options={customerList.map((item) => {
+                return { ...item, value: item.id };
+              })}
               value={customer.id}
-            >
-              <option value={""} disabled>
-                Select Customer
-              </option>
-              {customerList.map((item, i) => (
-                <option value={item.id} key={i}>
-                  {item.name} - {item.id}
-                </option>
-              ))}
-            </Form.Select>
+              search
+              closeOnSelect
+              onChange={(value) => {
+                if (value) {
+                  const customer = customerListObject[value];
+                  setCustomer({ ...customer });
+                } else {
+                  setCustomer({ id: "" });
+                }
+              }}
+              placeholder="Search Customer"
+            />
           </Form.Group>
           <Form.Group className="mb-3" controlId="formBasicEmail">
             <Form.Label>Credit Terms</Form.Label>
