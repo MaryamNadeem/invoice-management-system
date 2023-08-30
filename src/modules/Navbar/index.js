@@ -8,7 +8,9 @@ function ColorSchemesExample() {
     <>
       <Navbar bg="dark" variant="dark">
         <Container>
-          <Navbar.Brand to="/">Umer Enterprise</Navbar.Brand>
+          <Navbar.Brand as={Link} to="/">
+            Umer Enterprise
+          </Navbar.Brand>
           <Nav className="me-auto">
             <Nav.Link as={Link} to="/new-invoice">
               Add New Invoice
@@ -18,9 +20,6 @@ function ColorSchemesExample() {
             </Nav.Link>
             <Nav.Link as={Link} to="/customer-listing">
               Customer Listing
-            </Nav.Link>
-            <Nav.Link as={Link} to="/">
-              Item Listing
             </Nav.Link>
           </Nav>
         </Container>

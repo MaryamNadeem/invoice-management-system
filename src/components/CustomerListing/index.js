@@ -7,6 +7,9 @@ import Dropdown from "react-bootstrap/Dropdown";
 import Pagination from "react-bootstrap/Pagination";
 // @import styles
 import styles from "./index.module.scss";
+import { Link } from "react-router-dom";
+import moment from "moment/moment";
+import { Button } from "react-bootstrap";
 
 const orderByValues = [
   { field: "serial", desc: true },
@@ -161,40 +164,30 @@ export default function CustomerListing() {
           <thead>
             <tr>
               <th>sr#</th>
-              <th>ID</th>
               <th>Name</th>
-              <th>Address</th>
-              <th>Contact Person</th>
-              <th>Phone Number</th>
-              <th>Mobile Number</th>
-              <th>Email</th>
-              <th>Fax</th>
-              <th>Sales Tax Number</th>
-              <th>NTN</th>
-              <th>Opening Balance Amount</th>
-              <th>Opening Balance Date</th>
+
               <th>Current Balance</th>
               <th>Created At</th>
+              <th>View Details</th>
             </tr>
           </thead>
           <tbody>
             {customerListing.map((item, i) => (
               <tr key={i}>
                 <td>{item.serial}</td>
-                <td>{item.id}</td>
                 <td>{item.name}</td>
-                <td>{item.address}</td>
-                <td>{item.contactPerson}</td>
-                <td>{item.phoneNumber}</td>
-                <td>{item.mobileNumber}</td>
-                <td>{item.email}</td>
-                <td>{item.fax}</td>
-                <td>{item.salesTaxNumber}</td>
-                <td>{item.ntn}</td>
-                <td>{item.openingBalanceAmount}</td>
-                <td>{item.openingBalanceDate}</td>
+
                 <td>{item.currentBalance}</td>
-                <td>{item.createdAt}</td>
+                <td>{moment(item.createdAt).format("DD/MM/YYYY hh:mm A")}</td>
+                <td>
+                  <Button
+                    variant="secondary"
+                    as={Link}
+                    to={`/customer-detail/${item.id}`}
+                  >
+                    View
+                  </Button>
+                </td>
               </tr>
             ))}
           </tbody>

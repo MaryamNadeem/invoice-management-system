@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 // @import depedecies
 import axios from "axios";
+import moment from "moment";
 // @import api
 import { getInvoiceApi } from "../../api";
 // @import bootstrap components
@@ -16,9 +17,11 @@ const pageSizeValues = [5, 10, 50, 100];
 
 const orderByValues = [
   { field: "createdAt", desc: true },
+  { field: "serial", desc: true },
   { field: "totalWithTax", desc: true },
   { field: "createdAt", desc: false },
   { field: "totalWithTax", desc: false },
+  { field: "serial", desc: false },
 ];
 
 export default function InvoiceListing() {
@@ -28,7 +31,7 @@ export default function InvoiceListing() {
   const [pageNumber, setPageNumber] = useState(1);
   const [totalPageCount, setTotalPageCount] = useState(0);
   const [invoiceListing, setInvoiceListing] = useState([]);
-  const [orderBy, setOrderBy] = useState({ field: "totalWithTax", desc: true });
+  const [orderBy, setOrderBy] = useState({ field: "serial", desc: true });
   const [invoiceDetails, setInvoiceDetails] = useState({});
   const [show, setShow] = useState(false);
 
@@ -154,7 +157,10 @@ export default function InvoiceListing() {
                 <td>{invoice.totalWithoutTax}</td>
                 <td>{invoice.taxAmount}</td>
                 <td>{invoice.totalWithTax}</td>
-                <td>{invoice.createdAt}</td>
+                <td>
+                  {invoice.createdAt &&
+                    moment(invoice.createdAt).format("DD/MM/YYYY hh:mm A")}
+                </td>
                 <td>
                   <Button
                     variant="secondary"
