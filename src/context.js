@@ -1,6 +1,7 @@
+import axios from "axios";
+import moment from "moment";
 import { createContext, useEffect, useState } from "react";
 import { getCustomerApi } from "./api";
-import axios from "axios";
 
 const AppContext = createContext();
 
@@ -9,7 +10,29 @@ const AppContextProvider = ({ children }) => {
   const [customerListObject, setCustomerListObject] = useState({});
 
   useEffect(() => {
-    getCustomerListing();
+    const data = localStorage.getItem("customerData");
+    let fetchLatest = false;
+    if (data) {
+      const parsedData = JSON.parse(data);
+      const expireTime = parsedData.expiresAt;
+      const currTime = moment();
+      if (currTime.isAfter(expireTime)) {
+        fetchLatest = true;
+      } else {
+        const list = parsedData.customerList;
+        if (!list) {
+          fetchLatest = true;
+        } else {
+          setCustomerList([...list]);
+        }
+      }
+    } else {
+      fetchLatest = true;
+    }
+
+    if (fetchLatest) {
+      getCustomerListing();
+    }
   }, []);
 
   useEffect(() => {
@@ -18,11 +41,15 @@ const AppContextProvider = ({ children }) => {
       customerList.forEach((value) => {
         obj[value.id] = { ...value };
       });
+
+      const expiresAt = moment().add(10, "m");
+      const cacheData = { customerList, expiresAt };
+      localStorage.setItem("customerData", JSON.stringify(cacheData));
     }
     setCustomerListObject({ ...obj });
   }, [customerList]);
 
-  const getCustomerListing = async () => {
+  const getCustomerListing = async (test) => {
     try {
       // setLoading(true);
       const res = await axios.get(`${getCustomerApi}`);
