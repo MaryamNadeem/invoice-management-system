@@ -44,6 +44,8 @@ export default function CustomerListing() {
   const [isDisabled, setIsDisabled] = useState(true);
   const [invoiceDetails, setInvoiceDetails] = useState({});
   const [show, setShow] = useState(false);
+  const [showProducts, setShowProducts] = useState(false);
+  const [productListing, setProductListing] = useState([]);
   const { customerList, customerListObject, setCustomerList } =
     useContext(AppContext);
   const { id } = useParams();
@@ -52,6 +54,9 @@ export default function CustomerListing() {
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+  const handleProductClose = () => setShowProducts(false);
+  const handleProductShow = () => setShowProducts(true);
 
   const getCustomerInvoices = async () => {
     try {
@@ -112,6 +117,18 @@ export default function CustomerListing() {
       </Pagination.Item>
     );
   }
+
+  useEffect(() => {
+    let prodList = [];
+    if (invoiceListing?.length > 0) {
+      invoiceListing.forEach((invoice, i) => {
+        invoice.itemListing?.forEach((item, j) => {
+          prodList.push(item);
+        });
+      });
+    }
+    setProductListing(prodList);
+  }, [invoiceListing]);
 
   useEffect(() => {
     if (customer) {
@@ -340,7 +357,15 @@ export default function CustomerListing() {
         <>
           <h1 className={styles.heading}>Invoice Listing</h1>
           <div className={styles.dropdownWrapper}>
-            <Dropdown>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                handleProductShow();
+              }}
+            >
+              View All Products
+            </Button>
+            <Dropdown className={styles.pageSizeDropDown}>
               <Dropdown.Toggle variant="secondary" id="dropdown-basic">
                 Order By
               </Dropdown.Toggle>
@@ -471,6 +496,50 @@ export default function CustomerListing() {
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={handleClose}>
+                Close
+              </Button>
+            </Modal.Footer>
+          </Modal>
+          <Modal
+            show={showProducts}
+            onHide={handleProductClose}
+            className={styles.invoiceModal}
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>All Products</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Table>
+                <thead>
+                  <tr>
+                    <th>SR.</th>
+                    <th>Name</th>
+                    <th>Quantity</th>
+                    <th>Rate</th>
+                    <th>Sales Tax Percentage</th>
+                    <th>Total Without Tax</th>
+                    <th>Tax Amount</th>
+                    <th>Total With Tax</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {productListing?.map((listItem, index) => (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td>{listItem?.name}</td>
+                      <td>{listItem?.quantity}</td>
+                      <td>{listItem?.rate}</td>
+                      <td>{listItem?.taxPercentage}%</td>
+                      <td>{listItem?.totalWithoutTax}</td>
+                      <td>{listItem?.taxAmount}</td>
+                      <td>{listItem?.totalWithTax}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleProductClose}>
                 Close
               </Button>
             </Modal.Footer>
