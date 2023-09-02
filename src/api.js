@@ -11,4 +11,11 @@ export const saveInvoiceApi = isLocal
   : "https://saveinvoice-mfhawj3fca-uc.a.run.app";
 export const getInvoiceApi = isLocal
   ? "http://127.0.0.1:5001/pitc-16c89/us-central1/getInvoices"
-  : "https://saveinvoice-mfhawj3fca-uc.a.run.app";
+  : "https://getinvoice-mfhawj3fca-uc.a.run.app";
+export const getCustomerInvoicesApi = isLocal
+  ? "http://127.0.0.1:5001/pitc-16c89/us-central1/getCustomerInvoices"
+  : "https://getcustomerinvoices-mfhawj3fca-uc.a.run.app";
+
+export const updateCustomerApi = isLocal
+  ? "http://127.0.0.1:5001/pitc-16c89/us-central1/updateCustomer"
+  : "https://updatecustomer-mfhawj3fca-uc.a.run.app";

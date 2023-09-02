@@ -1,0 +1,52 @@
+.heading {
+  margin-top: 20px;
+  text-align: center;
+}
+.formContainer {
+  background-color: #e8eaf6;
+  width: 80%;
+  margin: 50px auto;
+  padding: 80px 100px;
+  border: 1px black;
+  border-radius: 25px;
+  .innerHeading {
+    margin-bottom: 30px;
+  }
+}
+.alertWrapper {
+  margin-top: 20px !important;
+}
+.tableContainer {
+  background-color: #e8eaf6;
+  width: 80%;
+  margin: 50px auto;
+  padding: 80px 100px;
+  border: 1px black;
+  border-radius: 25px;
+}
+.heading {
+  margin-top: 20px;
+  text-align: center;
+}
+.paginationWrapper {
+  display: flex;
+  justify-content: right;
+}
+.dropdownWrapper {
+  width: 80%;
+  margin: 15px auto;
+  display: flex;
+  justify-content: right;
+}
+
+.pageSizeDropDown {
+  margin-left: 10px;
+}
+
+.invoiceModal {
+  :global {
+    .modal-dialog {
+      max-width: 90%;
+    }
+  }
+}

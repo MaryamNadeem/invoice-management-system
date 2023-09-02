@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import InvoiceForm from "./components/InvoiceForm";
 import CustomerForm from "./components/CustomerForm";
 import InvoiceListing from "./components/InvoiceListing";
+import CustomerDetail from "./components/CustomerDetail";
 import CustomerListing from "./components/CustomerListing";
 // @import modules
 import Navbar from "./modules/Navbar";
@@ -28,6 +29,10 @@ const routes = [
   {
     path: "/customer-listing",
     component: <CustomerListing />,
+  },
+  {
+    path: "/customer-detail/:id",
+    component: <CustomerDetail />,
   },
 ];
 

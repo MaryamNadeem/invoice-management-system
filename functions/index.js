@@ -69,6 +69,30 @@ exports.getCustomers = onRequest(async (req, res) => {
   });
 });
 
+exports.updateCustomer = onRequest(async (req, res) => {
+  cors(req, res, async () => {
+    const customer = req.body.customer;
+    if (customer.id) {
+      const customerRef = admin
+        .firestore()
+        .collection("Customer")
+        .doc(customer.id);
+
+      await customerRef.update(customer);
+
+      res.json({
+        success: true,
+        result: "Customer updated",
+      });
+    } else {
+      res.json({
+        success: true,
+        result: "Please provide a customer id",
+      });
+    }
+  });
+});
+
 const getPageDetails = (pageNumber, pageSize, count) => {
   const totalPages = Math.ceil(count / pageSize);
   return {
@@ -212,3 +236,58 @@ const mapCustomer = (item) => {
     id: item.get("id"),
   };
 };
+
+exports.getCustomerInvoices = onRequest(async (req, res) => {
+  cors(req, res, async () => {
+    let customerId = req.query?.customerId;
+    if (customerId) {
+      let orderByField = req.query?.orderBy || "";
+      let orderDesc =
+        req.query?.orderDesc && req.query.orderDesc === "true" ? true : false;
+      let pageNumber = req.query?.pageNumber
+        ? Number.parseInt(req.query.pageNumber)
+        : 1;
+      let pageSize = req.query?.pageSize
+        ? Number.parseInt(req.query.pageSize)
+        : 10;
+
+      if (pageNumber <= 0) pageNumber = 1;
+      if (pageSize <= 0 || pageSize >= 100) pageSize = 10;
+
+      switch (orderByField) {
+        case "createdAt":
+          orderByField = "createdAt";
+          break;
+        case "totalWithTax":
+          orderByField = "totalWithTax";
+          break;
+        default:
+          orderByField = "createdAt";
+          break;
+      }
+
+      const invoiceCollection = admin
+        .firestore()
+        .collection("Invoice")
+        .where("customer.id", "==", customerId);
+
+      let query = orderDesc
+        ? invoiceCollection.orderBy(orderByField, "desc")
+        : invoiceCollection.orderBy(orderByField);
+
+      let list = await getPaginatedList(pageNumber, pageSize, query);
+
+      const count = (await query.count().get()).data().count;
+
+      const invoices = list.map((item) => mapInvoice(item));
+
+      const pagination = getPageDetails(pageNumber, pageSize, count);
+      res.json({ invoices, pagination });
+    } else {
+      res.json({
+        success: false,
+        result: "Please provide a customer id",
+      });
+    }
+  });
+});
