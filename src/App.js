@@ -6,6 +6,7 @@ import CustomerForm from "./components/CustomerForm";
 import InvoiceListing from "./components/InvoiceListing";
 import CustomerDetail from "./components/CustomerDetail";
 import CustomerListing from "./components/CustomerListing";
+import InvoiceDetail from "./components/InvoiceDetail";
 // @import modules
 import Navbar from "./modules/Navbar";
 import { AppContextProvider } from "./context";
@@ -33,6 +34,10 @@ const routes = [
   {
     path: "/customer-detail/:id",
     component: <CustomerDetail />,
+  },
+  {
+    path: "/invoice-detail/:id",
+    component: <InvoiceDetail />,
   },
 ];
 

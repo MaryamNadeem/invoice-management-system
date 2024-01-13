@@ -125,7 +125,7 @@ exports.saveInvoice = onRequest(async (req, res) => {
       const serialNumber = await generateSerial(
         admin.firestore().collection("Invoice")
       );
-      await admin
+      const writeResult = await admin
         .firestore()
         .collection("Invoice")
         .add({ ...invoice, serial: serialNumber });
@@ -133,11 +133,35 @@ exports.saveInvoice = onRequest(async (req, res) => {
         success: true,
         result: `Invoice saved successfully`,
       });
+      const invoiceRef = admin
+        .firestore()
+        .collection("Invoice")
+        .doc(writeResult.id);
+
+      await invoiceRef.set(
+        {
+          id: writeResult.id,
+        },
+        { merge: true }
+      );
     } else {
       res.json({
         success: false,
         result: "Please provide a customer for invoice",
       });
+    }
+  });
+});
+
+exports.getInvoice = onRequest(async (req, res) => {
+  cors(req, res, async () => {
+    const invoiceId = req.query?.invoiceId;
+    if (invoiceId) {
+      const invoiceRef = admin.firestore().collection("Invoice").doc(invoiceId);
+      const invoice = (await invoiceRef.get()).data();
+      res.json({ invoice });
+    } else {
+      res.json({ success: false, result: "Please provide invoice id" });
     }
   });
 });
@@ -211,6 +235,7 @@ const mapInvoice = (item) => {
     taxAmount: item.get("taxAmount"),
     totalWithTax: item.get("totalWithTax"),
     createdAt: item.get("createdAt"),
+    id: item.get("id"),
   };
 };
 

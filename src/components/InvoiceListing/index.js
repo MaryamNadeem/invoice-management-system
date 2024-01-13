@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 // @import depedecies
 import axios from "axios";
 import moment from "moment";
+import { Link } from "react-router-dom";
 // @import api
-import { getInvoiceApi } from "../../api";
+import { getInvoicesApi } from "../../api";
 // @import bootstrap components
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
@@ -42,7 +43,7 @@ export default function InvoiceListing() {
     try {
       // setLoading(true);
       const res = await axios.get(
-        `${getInvoiceApi}?orderBy=${orderBy.field}&orderDesc=${orderBy.desc}&pageNumber=${pageNumber}&pageSize=${pageSize}`
+        `${getInvoicesApi}?orderBy=${orderBy.field}&orderDesc=${orderBy.desc}&pageNumber=${pageNumber}&pageSize=${pageSize}`
       );
       if (res.data) {
         setInvoiceListing(res.data.invoices);
@@ -170,7 +171,14 @@ export default function InvoiceListing() {
                       setInvoiceDetails(invoice);
                     }}
                   >
-                    View Details
+                    View Products
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    as={Link}
+                    to={`/invoice-detail/${invoice.id}`}
+                  >
+                    Edit
                   </Button>
                 </td>
               </tr>
