@@ -135,6 +135,7 @@ export default function CustomerListing() {
       setInputs(customer);
       getCustomerInvoices();
     }
+    // eslint-disable-next-line
   }, [customer]);
 
   /* eslint-disable */

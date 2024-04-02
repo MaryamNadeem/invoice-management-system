@@ -142,6 +142,7 @@ function InvoiceDetail() {
     if (id) {
       getInvoice();
     }
+    // eslint-disable-next-line
   }, []);
 
   return (
