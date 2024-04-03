@@ -316,3 +316,27 @@ exports.getCustomerInvoices = onRequest(async (req, res) => {
     }
   });
 });
+
+exports.updateInvoice = onRequest(async (req, res) => {
+  cors(req, res, async () => {
+    const invoice = req.body.invoice;
+    if (invoice.id) {
+      const invoiceRef = admin
+        .firestore()
+        .collection("Invoice")
+        .doc(invoice.id);
+
+      await invoiceRef.update(invoice);
+
+      res.json({
+        success: true,
+        result: "Invoice updated",
+      });
+    } else {
+      res.json({
+        success: true,
+        result: "Please provide invoice id",
+      });
+    }
+  });
+});

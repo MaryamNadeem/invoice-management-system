@@ -21,3 +21,6 @@ export const updateCustomerApi = isLocal
 export const getInvoiceApi = isLocal
   ? "http://127.0.0.1:5001/pitc-16c89/us-central1/getInvoice"
   : "https://getinvoice-mfhawj3fca-uc.a.run.app";
+export const updateInvoiceApi = isLocal
+  ? "http://127.0.0.1:5001/pitc-16c89/us-central1/updateInvoice"
+  : "https://updateinvoice-mfhawj3fca-uc.a.run.app";

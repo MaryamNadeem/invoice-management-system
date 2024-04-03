@@ -4,7 +4,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import SelectSearch from "react-select-search";
 // @import api
-import { saveInvoiceApi, getInvoiceApi } from "../../api";
+import { updateInvoiceApi, getInvoiceApi } from "../../api";
 // @import bootstrap components
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -35,6 +35,7 @@ function InvoiceDetail() {
   const [creditTerms, setCreditTerms] = useState("");
   const [customer, setCustomer] = useState({ id: "" });
   const [isSaved, setIsSaved] = useState();
+  const [invoice, setInvoice] = useState(null);
   const { id } = useParams();
 
   const { customerList, customerListObject } = useContext(AppContext);
@@ -79,8 +80,11 @@ function InvoiceDetail() {
     if (!customer || !customer.id) {
       alert("Please select Customer");
       return;
+    } else if (!invoice || !invoice.id) {
+      alert("Invoice not present");
+      return;
     }
-    let invoice = {
+    let invoiceObj = {
       customer: {
         id: customer.id,
         name: customer.name,
@@ -91,18 +95,13 @@ function InvoiceDetail() {
       totalWithoutTax: totalWithoutTax,
       taxAmount: taxAmount,
       totalWithTax: totalWithTax,
-      createdAt: new Date(),
+      id: invoice.id,
+      serial: invoice.serial,
     };
     setLoading(true);
-    const res = await axios.post(saveInvoiceApi, { invoice: invoice });
+    const res = await axios.post(updateInvoiceApi, { invoice: invoiceObj });
     if (res.data.success === true) {
       setIsSaved(true);
-      setCustomer({ id: "" });
-      setCreditTerms("");
-      setItemListing([]);
-      setTotalWithTax(0);
-      setTotalWithoutTax(0);
-      setTaxAmount(0);
     } else {
       setIsSaved(false);
     }
@@ -128,11 +127,16 @@ function InvoiceDetail() {
       const res = await axios.get(`${getInvoiceApi}?invoiceId=${id}`);
       if (res.data) {
         setItemListing(res.data.invoice?.itemListing);
-        setCustomer({ id: res.data.invoice?.customer?.id });
+        setCustomer({
+          id: res.data.invoice?.customer?.id,
+          name: res.data.invoice?.customer?.name,
+          serial: res.data.invoice?.customer?.serial,
+        });
         setCreditTerms(res.data.invoice?.creditTerms);
         setTaxAmount(res.data.invoice?.taxAmount);
         setTotalWithTax(res.data.invoice?.setTotalWithTax);
         setTotalWithoutTax(res.data.invoice?.setTotalWithTax);
+        setInvoice(res.data.invoice);
       }
     } catch (e) {
       console.log(e);
@@ -144,6 +148,12 @@ function InvoiceDetail() {
     }
     // eslint-disable-next-line
   }, []);
+
+  const deleteItem = (indexToDelete) => {
+    setItemListing((prevItems) =>
+      prevItems.filter((_, index) => index !== indexToDelete)
+    );
+  };
 
   return (
     <>
@@ -301,7 +311,7 @@ function InvoiceDetail() {
                 <th>Total Without Tax</th>
                 <th>Tax Amount</th>
                 <th>Total With Tax</th>
-                <th>Edit</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -316,7 +326,15 @@ function InvoiceDetail() {
                   <td>{listItem.taxAmount}</td>
                   <td>{listItem.totalWithTax}</td>
                   <td>
-                    <Button variant="dark">Edit</Button>
+                    <Button
+                      disabled={loading}
+                      variant="dark"
+                      onClick={() => {
+                        deleteItem(index);
+                      }}
+                    >
+                      <i className="fa fa-trash"></i>
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -328,7 +346,7 @@ function InvoiceDetail() {
           <h6>Tax Amount: {taxAmount}</h6>
           <h6>Total with Sales Tax: {totalWithTax}</h6>
           <Button disabled={loading} variant="dark" onClick={saveInvoice}>
-            <i className="fa fa-save"></i> {loading ? "Saving" : "Save"}
+            <i className="fa fa-save"></i> {loading ? "Updating" : "Update"}
           </Button>
           &nbsp;
           <Button variant="dark">
@@ -339,7 +357,7 @@ function InvoiceDetail() {
           <Row>
             <div className={styles.alertWrapper}>
               {isSaved === true && (
-                <Alert variant="success">Invoice saved Successfully</Alert>
+                <Alert variant="success">Invoice Updated Successfully</Alert>
               )}
               {isSaved === false && (
                 <Alert variant="danger">

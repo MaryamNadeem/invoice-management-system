@@ -146,7 +146,7 @@ export default function InvoiceListing() {
               <th>Tax Amount</th>
               <th>Total with Tax</th>
               <th>Created At</th>
-              <th>Details</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -167,18 +167,18 @@ export default function InvoiceListing() {
                     variant="secondary"
                     onClick={() => {
                       handleShow();
-                      console.log("is main", invoice);
                       setInvoiceDetails(invoice);
                     }}
                   >
-                    View Products
+                    <i className="fa fa-list"></i>
                   </Button>
                   <Button
                     variant="secondary"
                     as={Link}
                     to={`/invoice-detail/${invoice.id}`}
+                    className={styles.editBtn}
                   >
-                    Edit
+                    <i className="fa fa-edit"></i>
                   </Button>
                 </td>
               </tr>
