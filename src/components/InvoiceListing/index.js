@@ -63,6 +63,10 @@ export default function InvoiceListing() {
   }, [orderBy, pageNumber, pageSize]);
   /* eslint-enable */
 
+  useEffect(() => {
+    getInvoiceListing();
+  }, []);
+
   let pageButtons = [];
   for (let number = 1; number <= totalPageCount; number++) {
     pageButtons.push(
