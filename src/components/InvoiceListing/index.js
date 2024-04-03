@@ -65,6 +65,7 @@ export default function InvoiceListing() {
 
   useEffect(() => {
     getInvoiceListing();
+    // eslint-disable-next-line
   }, []);
 
   let pageButtons = [];
