@@ -47,7 +47,7 @@ export default function InvoiceListing() {
       );
       if (res.data) {
         setInvoiceListing(res.data.invoices);
-        setTotalPageCount(res.data.pagination.totalPages);
+        setTotalPageCount(res.data.pagination?.totalPages || 1);
       }
     } catch (e) {
       console.log(e);
@@ -150,7 +150,7 @@ export default function InvoiceListing() {
             </tr>
           </thead>
           <tbody>
-            {invoiceListing.map((invoice, i) => (
+            {invoiceListing?.map((invoice, i) => (
               <tr key={i}>
                 <td>{invoice.serial}</td>
                 <td>{invoice.customer.name}</td>
