@@ -121,6 +121,12 @@ function InvoiceForm() {
     setTotalWithTax(postTax);
   }, [itemListing]);
 
+  const deleteItem = (indexToDelete) => {
+    setItemListing((prevItems) =>
+      prevItems.filter((_, index) => index !== indexToDelete)
+    );
+  };
+
   return (
     <>
       <h1 className={styles.heading}>Sales Invoice</h1>
@@ -276,6 +282,7 @@ function InvoiceForm() {
                 <th>Total Without Tax</th>
                 <th>Tax Amount</th>
                 <th>Total With Tax</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -289,6 +296,17 @@ function InvoiceForm() {
                   <td>{listItem.totalWithoutTax}</td>
                   <td>{listItem.taxAmount}</td>
                   <td>{listItem.totalWithTax}</td>
+                  <td>
+                    <Button
+                      disabled={loading}
+                      variant="dark"
+                      onClick={() => {
+                        deleteItem(index);
+                      }}
+                    >
+                      <i className="fa fa-trash"></i>
+                    </Button>
+                  </td>
                 </tr>
               ))}
             </tbody>
