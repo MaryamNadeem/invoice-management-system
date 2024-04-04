@@ -2,8 +2,10 @@ import { useContext, useEffect, useState } from "react";
 // @import depedecies
 import axios from "axios";
 import SelectSearch from "react-select-search";
+import InvoicePDF from "../../modules/InvoicePDF";
 // @import api
 import { saveInvoiceApi } from "../../api";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 // @import bootstrap components
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -320,9 +322,23 @@ function InvoiceForm() {
             <i className="fa fa-save"></i> {loading ? "Saving" : "Save"}
           </Button>
           &nbsp;
-          <Button variant="dark">
-            <i className="fa fa-print"></i> Print
-          </Button>
+          <PDFDownloadLink
+            document={
+              <InvoicePDF
+                customerName={customer.name}
+                creditTerms={creditTerms}
+                totalWithoutTax={totalWithoutTax}
+                totalWithTax={totalWithTax}
+                taxAmount={taxAmount}
+                itemListing={itemListing}
+              />
+            }
+            fileName={"invoice.pdf"}
+          >
+            <Button variant="dark">
+              <i className="fa fa-print"></i> Print
+            </Button>
+          </PDFDownloadLink>
         </div>
         <Container>
           <Row>

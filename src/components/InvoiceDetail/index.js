@@ -3,6 +3,8 @@ import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import SelectSearch from "react-select-search";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import InvoicePDF from "../../modules/InvoicePDF";
 // @import api
 import { updateInvoiceApi, getInvoiceApi } from "../../api";
 // @import bootstrap components
@@ -349,9 +351,23 @@ function InvoiceDetail() {
             <i className="fa fa-save"></i> {loading ? "Updating" : "Update"}
           </Button>
           &nbsp;
-          <Button variant="dark">
-            <i className="fa fa-print"></i> Print
-          </Button>
+          <PDFDownloadLink
+            document={
+              <InvoicePDF
+                customerName={customer.name}
+                creditTerms={creditTerms}
+                totalWithoutTax={totalWithoutTax}
+                totalWithTax={totalWithTax}
+                taxAmount={taxAmount}
+                itemListing={itemListing}
+              />
+            }
+            fileName={"invoice.pdf"}
+          >
+            <Button variant="dark">
+              <i className="fa fa-print"></i> Print
+            </Button>
+          </PDFDownloadLink>
         </div>
         <Container>
           <Row>
